@@ -7,5 +7,7 @@ namespace WebApi.Services
     {
         Task<IdentityResult> CreateUserAsync(RegisterModel model);
         Task<bool> ConfirmEmailAsync(ConfirmEmailModel model);
+        Task<SignInResult> SignInAsync(SignInModel model);
+        Task SignOutAsync();
     }
 }

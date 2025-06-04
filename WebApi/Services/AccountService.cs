@@ -50,4 +50,14 @@ public class AccountService(UserManager<IdentityUser> userManager, SignInManager
 
         return true;
     }
+    public async Task<SignInResult> SignInAsync(SignInModel model)
+    {
+        var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, false, false);
+        return result;
+    }
+
+    public async Task SignOutAsync()
+    {
+        await _signInManager.SignOutAsync();
+    }
 }
