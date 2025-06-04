@@ -1,5 +1,8 @@
 ﻿using Azure.Messaging.ServiceBus;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using System.Text.Json;
 using WebApi.Models;
 
@@ -50,7 +53,8 @@ public class AccountService(UserManager<IdentityUser> userManager, SignInManager
 
         return true;
     }
-    public async Task<SignInResult> SignInAsync(SignInModel model)
+
+    public async Task<Microsoft.AspNetCore.Identity.SignInResult> SignInAsync(SignInModel model)
     {
         var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, false, false);
         return result;
@@ -60,4 +64,6 @@ public class AccountService(UserManager<IdentityUser> userManager, SignInManager
     {
         await _signInManager.SignOutAsync();
     }
+
+  
 }

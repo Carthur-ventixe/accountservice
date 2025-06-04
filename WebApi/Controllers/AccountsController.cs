@@ -1,4 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using WebApi.Models;
 using WebApi.Services;
 
@@ -6,9 +9,11 @@ namespace WebApi.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class AccountsController(IAccountService accountService) : ControllerBase
+public class AccountsController(IAccountService accountService, UserManager<IdentityUser> userManager, ITokenService tokenService) : ControllerBase
 {
     private readonly IAccountService _accountService = accountService;
+    private readonly UserManager<IdentityUser> _userManager = userManager;
+    private readonly ITokenService _tokenService = tokenService;
 
     [HttpPost("register")]
     public async Task<IActionResult> Register(RegisterModel model)
@@ -24,7 +29,7 @@ public class AccountsController(IAccountService accountService) : ControllerBase
     }
 
     [HttpPost("confirm")]
-    public async Task<IActionResult> Confirm([FromBody]ConfirmEmailModel model)
+    public async Task<IActionResult> Confirm([FromBody] ConfirmEmailModel model)
     {
         var result = await _accountService.ConfirmEmailAsync(model);
         if (!result)
@@ -40,6 +45,32 @@ public class AccountsController(IAccountService accountService) : ControllerBase
         if (!result.Succeeded)
             return Unauthorized("Invalid email or password");
 
+        var user = await _userManager.FindByEmailAsync(model.Email);
+        if (user == null)
+            return NotFound();
+
+        var accessToken = _tokenService.GenerateAccessToken(user);
+
+        return Ok(new { accessToken });
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> SignOutAsync()
+    {
+        await _accountService.SignOutAsync();
         return Ok();
+    }
+
+    [HttpGet("validate")]
+    [Authorize]
+    public IActionResult ValidateToken()
+    {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        return Ok(new
+        {
+            valid = true,
+            UserId = userId,
+        });
     }
 }
