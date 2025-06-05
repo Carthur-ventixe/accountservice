@@ -54,7 +54,7 @@ public class AccountsController(IAccountService accountService, UserManager<Iden
         return Ok(new { accessToken });
     }
 
-    [HttpPost]
+    [HttpPost("signout")]
     public async Task<IActionResult> SignOutAsync()
     {
         await _accountService.SignOutAsync();
