@@ -21,9 +21,13 @@ public class AccountsController(IAccountService accountService, UserManager<Iden
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
+        var existingUser = await _userManager.FindByEmailAsync(model.Email);
+        if (existingUser != null)
+            return BadRequest("User already exists");
+
         var result = await _accountService.CreateUserAsync(model);
         if (!result.Succeeded)
-            return BadRequest();
+            return BadRequest("Error creating user");
 
         return Ok();
     }
