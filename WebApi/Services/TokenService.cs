@@ -20,7 +20,7 @@ public class TokenService(IConfiguration config) : ITokenService
             new Claim(ClaimTypes.NameIdentifier, user.Id)
         };
 
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["JwtSettings:Secret"]!));
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["JwtSecret"]!));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
         var token = new JwtSecurityToken(

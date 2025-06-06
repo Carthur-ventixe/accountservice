@@ -1,3 +1,5 @@
+using Azure.Identity;
+using Azure.Security.KeyVault.Secrets;
 using Azure.Messaging.ServiceBus;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -8,6 +10,14 @@ using WebApi.Data;
 using WebApi.Services;
 
 var builder = WebApplication.CreateBuilder(args);
+
+var keyVaultUrl = builder.Configuration["AzureKeyVault:VaultUri"];
+
+if (!string.IsNullOrEmpty(keyVaultUrl))
+{
+    var credential = new DefaultAzureCredential();
+    builder.Configuration.AddAzureKeyVault(new Uri(keyVaultUrl), credential);
+}
 
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
@@ -23,7 +33,8 @@ builder.Services.AddIdentity<IdentityUser, IdentityRole>(x =>
 
 // Jwt
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
-var secret = jwtSettings["Secret"];
+var secret = builder.Configuration["JwtSecret"];
+
 
 builder.Services.AddAuthentication(options =>
 {
@@ -40,10 +51,9 @@ builder.Services.AddAuthentication(options =>
             ValidateIssuerSigningKey = true,
             ValidIssuer = jwtSettings["Issuer"],
             ValidAudience = jwtSettings["Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret))
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret!))
         };
     });
-
 
 //
 builder.Services.AddSingleton(x => new ServiceBusClient(builder.Configuration.GetConnectionString("ServiceBus")));
