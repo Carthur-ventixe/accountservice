@@ -31,11 +31,11 @@ builder.Services.AddIdentity<IdentityUser, IdentityRole>(x =>
     .AddEntityFrameworkStores<DataContext>()
     .AddDefaultTokenProviders();
 
-// Jwt
+
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
 var secret = builder.Configuration["JwtSecret"];
 
-
+// tagit hjälp av chatgpt
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -55,7 +55,6 @@ builder.Services.AddAuthentication(options =>
         };
     });
 
-//
 builder.Services.AddSingleton(x => new ServiceBusClient(builder.Configuration.GetConnectionString("ServiceBus")));
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
